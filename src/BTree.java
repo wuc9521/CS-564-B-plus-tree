@@ -6,7 +6,7 @@ import java.util.List;
  * Key - StudentId
  * Leaf Node should contain [ key,recordId ]
  */
-class BTree {
+public class BTree {
 
     /**
      * Pointer to the root node.
@@ -17,50 +17,93 @@ class BTree {
      **/
     private int t;
 
-    BTree(int t) {
+    /**
+     * Constructor
+     * 
+     * @param t minimum degree of B+Tree
+     */
+    public BTree(int t) {
         this.root = null;
         this.t = t;
     }
 
-    long search(long studentId) {
-        /**
-         * TODO:
-         * Implement this function to search in the B+Tree.
-         * Return recordID for the given StudentID.
-         * Otherwise, print out a message that the given studentId has not been found in the table and return -1.
-         */
-        return -1;
+    /**
+     * Search the studentId in the B+Tree
+     * 
+     * @param studentId studentId to search
+     * @return recordID for the given StudentID. Otherwise, -1
+     */
+    public long search(long studentId) {
+        if (root == null) {
+            System.out.println("The studentId " + studentId + " has not been found in the table.");
+            return -1;
+        }
+        return root.search(studentId);
     }
 
-    BTree insert(Student student) {
-        /**
-         * TODO:
-         * Implement this function to insert in the B+Tree.
-         * Also, insert in student.csv after inserting in B+Tree.
-         */
+
+    /**
+     * Insert a new student in the B+Tree
+     * 
+     * @param student student to insert
+     * @return B+Tree after inserting the student
+     */
+    public BTree insert(Student student) {
+        if (root == null) {
+            root = new BTreeNode(t, true);
+            root.keys[0] = student.getStudentId();
+            root.values[0] = student.getRecordId();
+            root.n = 1;
+        } else {
+            if (root.n == 2 * t - 1) {
+                BTreeNode s = new BTreeNode(t, false);
+                s.children[0] = root;
+                s.splitChild(0, root);
+                int i = 0;
+                if (s.keys[0] < student.getStudentId()) {
+                    i++;
+                }
+                s.children[i].insertNonFull(student);
+                root = s;
+            } else {
+                root.insertNonFull(student);
+            }
+        }
         return this;
     }
 
-    boolean delete(long studentId) {
-        /**
-         * TODO:
-         * Implement this function to delete in the B+Tree.
-         * Also, delete in student.csv after deleting in B+Tree, if it exists.
-         * Return true if the student is deleted successfully otherwise, return false.
-         */
+    /**
+     * Delete a student from the B+Tree
+     * 
+     * @param studentId studentId to delete
+     * @return true if the student is deleted successfully otherwise, return false.
+     */
+    public boolean delete(long studentId) {
+        if (root == null) {
+            System.out.println("The tree is empty");
+            return false;
+        }
+        root.delete(studentId);
+        if (root.n == 0) {
+            if (!root.leaf) {
+                root = root.children[0];
+            } else {
+                root = null;
+            }
+        }
         return true;
     }
 
-    List<Long> print() {
-
+    /**
+     * Print the B+Tree
+     * 
+     * @return a list of recordIDs from left to right of leaf nodes.
+     */
+    public List<Long> print() {
         List<Long> listOfRecordID = new ArrayList<>();
-
-        /**
-         * TODO:
-         * Implement this function to print the B+Tree.
-         * Return a list of recordIDs from left to right of leaf nodes.
-         *
-         */
+        if (root != null) {
+            root.traverse(listOfRecordID);
+        }
         return listOfRecordID;
     }
 }
