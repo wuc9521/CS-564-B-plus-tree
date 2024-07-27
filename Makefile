@@ -6,3 +6,7 @@ run: out/BTreeMain.class
 
 clean: 
 	@rm -f out/*.class
+
+test: out/BTreeMain.class
+	@cp archive/Student.cpy.csv src/Student.csv
+	@java -cp out BTreeMain

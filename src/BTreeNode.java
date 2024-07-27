@@ -81,56 +81,64 @@ public class BTreeNode {
      * @param student student to search
      */
     public void insertNonFull(Student student) {
-        int i = this.n - 1;
+        int idx = this.n - 1;
         if (isLeaf) {
-            while (i >= 0 && keys[i] > student.getStudentId()) {
-                keys[i + 1] = keys[i];
-                values[i + 1] = values[i];
-                i--;
+            // Find the location where new key should be inserted
+            while (idx >= 0 && this.keys[idx] > student.getStudentId()) {
+                this.keys[idx + 1] = this.keys[idx];
+                this.values[idx + 1] = this.values[idx];
+                idx--;
             }
-            keys[i + 1] = student.getStudentId();
-            values[i + 1] = student.getRecordId();
-            n++;
+            // Check if the key already exists
+            if (idx >= 0 && this.keys[idx] == student.getStudentId()) {
+                System.out.println("The studentId " + student.getStudentId() + " already exists in the tree.");
+                return;
+            } else {
+                // Insert the new key at found location
+                this.keys[idx + 1] = student.getStudentId();
+                this.values[idx + 1] = student.getRecordId();
+                n++;
+            }
         } else {
-            while (i >= 0 && keys[i] > student.getStudentId()) {
-                i--;
+            while (idx >= 0 && this.keys[idx] > student.getStudentId()) {
+                idx--;
             }
-            if (children[i + 1].n == 2 * t) { // If the child is full, then split it
-                splitChild(i + 1, children[i + 1]);
-                if (keys[i + 1] < student.getStudentId()) {
-                    i++;
+            if (children[idx + 1].n == 2 * t) { // If the child is full, then split it
+                this.splitChild(idx + 1, this.children[idx + 1]);
+                if (this.keys[idx + 1] < student.getStudentId()) {
+                    idx++;
                 }
             }
-            children[i + 1].insertNonFull(student);
+            this.children[idx + 1].insertNonFull(student);
         }
     }
 
     /**
      * A utility function to split the child y of this node
      * 
-     * @param i index of the child to be split
-     * @param y child to be split
+     * @param idx index of the child to be split
+     * @param node child to be split
      */
-    public void splitChild(int i, BTreeNode y) {
-        BTreeNode z = new BTreeNode(y.t, y.isLeaf);
-        z.n = t - 1;
+    public void splitChild(int idx, BTreeNode node) {
+        BTreeNode newNode = new BTreeNode(node.t, node.isLeaf);
+        newNode.n = t - 1;
         for (int j = 0; j < t - 1; j++) {
-            z.keys[j] = y.keys[j + t];
+            newNode.keys[j] = node.keys[j + t];
         }
-        if (!y.isLeaf) {
+        if (!node.isLeaf) {
             for (int j = 0; j < t; j++) {
-                z.children[j] = y.children[j + t];
+                newNode.children[j] = node.children[j + t];
             }
         }
-        y.n = t - 1;
-        for (int j = n; j >= i + 1; j--) {
+        node.n = t - 1;
+        for (int j = n; j >= idx + 1; j--) {
             children[j + 1] = children[j];
         }
-        children[i + 1] = z;
-        for (int j = n - 1; j >= i; j--) {
+        children[idx + 1] = newNode;
+        for (int j = n - 1; j >= idx; j--) {
             keys[j + 1] = keys[j];
         }
-        keys[i] = y.keys[t - 1];
+        keys[idx] = node.keys[t - 1];
         n++;
     }
 
@@ -145,28 +153,28 @@ public class BTreeNode {
         while (i < n && studentId > keys[i]) {
             i++;
         }
-        if (keys[i] == studentId) {
-            return values[i];
+        if (this.keys[i] == studentId) {
+            return this.values[i];
         }
-        if (isLeaf) {
+        if (this.isLeaf) {
             return -1;
         }
-        return children[i].search(studentId);
+        return this.children[i].search(studentId);
     }
 
     /**
      * A function to find the first key greater than or equal to a given key
      * 
-     * @param k the key to find
+     * @param key the key to find
      * @return the index of the first key greater than or equal to k
      */
-    private int findKey(long k) {
+    private int findKey(long key) {
         int start = 0;
         int end = n - 1;
 
         while (start <= end) {
             int mid = (start + end) / 2;
-            if (keys[mid] < k) {
+            if (keys[mid] < key) {
                 start = mid + 1;
             } else {
                 end = mid - 1;
@@ -186,24 +194,21 @@ public class BTreeNode {
 
         if (idx < n && keys[idx] == studentId) {
             if (isLeaf) {
-                removeFromLeaf(idx);
+                this.removeFromLeaf(idx);
             } else {
-                removeFromNonLeaf(idx);
+                this.removeFromNonLeaf(idx);
             }
         } else {
             if (isLeaf) {
-                System.out.println("The studentId " + studentId + " is does not exist in the tree.");
+                System.out.println("The studentId " + studentId + " does not exist in the tree.");
                 return;
             }
-
-            // Flag to check if the key is present in the sub-tree rooted at the last child
-            // of this node
+            // check if the key is present in the sub-tree rooted at the last child of this
+            // node
             boolean flag = ((idx == n) ? true : false);
-
             if (children[idx].n < t) {
-                fill(idx);
+                this.fill(idx);
             }
-
             if (flag && idx > n) {
                 children[idx - 1].delete(studentId);
             } else {
@@ -218,11 +223,11 @@ public class BTreeNode {
      * @param idx the index of the key to remove
      */
     private void removeFromLeaf(int idx) {
-        for (int i = idx + 1; i < n; ++i) {
+        for (int i = idx + 1; i < n; i++) {
             keys[i - 1] = keys[i];
             values[i - 1] = values[i];
         }
-        n--;
+        this.n--;
     }
 
     /**
@@ -237,7 +242,7 @@ public class BTreeNode {
         // find the predecessor 'pred' of k in the subtree rooted at children[idx].
         // Replace k by pred. Recursively delete pred in children[idx].
         if (children[idx].n >= t) {
-            BTreeNode pred = getPred(idx);
+            BTreeNode pred = this.prefOf(idx);
             keys[idx] = pred.keys[pred.n - 1];
             values[idx] = pred.values[pred.n - 1];
             children[idx].delete(pred.keys[pred.n - 1]);
@@ -247,7 +252,7 @@ public class BTreeNode {
         // the subtree rooted at children[idx+1]. Replace k by succ.
         // Recursively delete succ in children[idx+1].
         else if (children[idx + 1].n >= t) {
-            BTreeNode succ = getSucc(idx);
+            BTreeNode succ = this.succOf(idx);
             keys[idx] = succ.keys[0];
             values[idx] = succ.values[0];
             children[idx + 1].delete(succ.keys[0]);
@@ -257,7 +262,7 @@ public class BTreeNode {
         // into children[idx]. Now children[idx] contains 2t-1 keys.
         // Recursively delete k from children[idx].
         else {
-            merge(idx);
+            this.merge(idx);
             children[idx].delete(k);
         }
     }
@@ -268,7 +273,7 @@ public class BTreeNode {
      * @param idx the index of the key
      * @return the predecessor of keys[idx]
      */
-    private BTreeNode getPred(int idx) {
+    private BTreeNode prefOf(int idx) {
         // Keep moving to the right most node until we reach a leaf
         BTreeNode cur = children[idx];
         while (!cur.isLeaf) {
@@ -277,8 +282,13 @@ public class BTreeNode {
         return cur;
     }
 
-    // A function to get successor of keys[idx]
-    private BTreeNode getSucc(int idx) {
+    /**
+     * A function to get successor of keys[idx]
+     * 
+     * @param idx the index of the key
+     * @return the successor of keys[idx]
+     */
+    private BTreeNode succOf(int idx) {
         // Keep moving the left most node starting from children[idx+1] until we reach a
         // leaf
         BTreeNode cur = children[idx + 1];
@@ -294,32 +304,25 @@ public class BTreeNode {
      * 
      * @param idx the index of the child node to fill up
      */
-
-    /**
-     * A function to fill up the child node present at idx which has less than t-1
-     * keys
-     * 
-     * @param idx the index of the child node to fill up
-     */
     private void fill(int idx) {
         // If the previous child(children[idx-1]) has more than t-1 keys, borrow a key
         // from that child
         if (idx != 0 && children[idx - 1].n >= t) {
-            borrowFromPrev(idx);
+            this.borrowPrev(idx);
         }
         // If the next child(children[idx+1]) has more than t-1 keys, borrow a key from
         // that child
         else if (idx != n && children[idx + 1].n >= t) {
-            borrowFromNext(idx);
+            borrowNext(idx);
         }
         // Merge children[idx] with its sibling
         // If children[idx] is the last child, merge it with with its previous sibling
         // Otherwise merge it with its next sibling
         else {
             if (idx != n) {
-                merge(idx);
+                this.merge(idx);
             } else {
-                merge(idx - 1);
+                this.merge(idx - 1);
             }
         }
     }
@@ -329,7 +332,7 @@ public class BTreeNode {
      * 
      * @param idx the index of the child node to borrow from
      */
-    private void borrowFromPrev(int idx) {
+    private void borrowPrev(int idx) {
         BTreeNode child = children[idx];
         BTreeNode sibling = children[idx - 1];
         for (int i = child.n - 1; i >= 0; --i) {
@@ -362,7 +365,7 @@ public class BTreeNode {
      * 
      * @param idx the index of the child node to borrow from
      */
-    private void borrowFromNext(int idx) {
+    private void borrowNext(int idx) {
         BTreeNode child = children[idx];
         BTreeNode sibling = children[idx + 1];
 
@@ -435,5 +438,34 @@ public class BTreeNode {
 
         // Freeing the memory occupied by sibling
         sibling = null;
+    }
+
+    /**
+     * Function to print all the keys in a subtree rooted with this node
+     * 
+     * @param prefix Prefix to be printed
+     * @param isTail true if the current node is the last child of the parent node
+     */
+    public void print(String prefix, boolean isTail) {
+        // Print the current node's keys
+        System.out.print(prefix + (isTail ? "└── " : "├── "));
+
+        for (int i = 0; i < n; i++) {
+            System.out.print(keys[i]);
+            if (isLeaf) {
+                System.out.print(" (" + values[i] + ")");
+            }
+            if (i < n - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println();
+
+        // Recursively print each child
+        if (!isLeaf) {
+            for (int i = 0; i <= n; i++) {
+                children[i].print(prefix + (isTail ? "    " : "│   "), i == n);
+            }
+        }
     }
 }

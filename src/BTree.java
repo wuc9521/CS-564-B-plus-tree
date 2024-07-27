@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * B+Tree Structure
@@ -27,6 +29,8 @@ public class BTree {
         this.root = null;
         this.t = t;
     }
+
+    private Set<Long> recordIds = new HashSet<>();
 
     /**
      * Search the studentId in the B+Tree
@@ -98,7 +102,7 @@ public class BTree {
     }
 
     /**
-     * Print the B+Tree
+     * get the list of recordIDs from left to right of leaf nodes.
      * 
      * @return a list of recordIDs from left to right of leaf nodes.
      */
@@ -107,6 +111,18 @@ public class BTree {
         if (this.root != null) {
             this.root.traverse(listOfRecordID);
         }
+        // add all the recordIDs from the leaf nodes to the list
         return listOfRecordID;
+    }
+
+    /**
+     * Print the B+ Tree
+     */
+    public void printTree(){
+        if (this.root != null) {
+            this.root.print("", true);
+        } else {
+            System.out.println("The tree is empty");
+        }
     }
 }
