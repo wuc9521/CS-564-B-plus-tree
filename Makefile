@@ -1,4 +1,4 @@
-out/BTreeMain.class: src/BTreeMain.java
+out/BTreeMain.class: src/*.java
 	@javac -cp .:src -d out src/BTreeMain.java
 
 run: out/BTreeMain.class

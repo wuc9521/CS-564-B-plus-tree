@@ -12,6 +12,7 @@ public class BTree {
      * Pointer to the root node.
      */
     private BTreeNode root;
+
     /**
      * Number of key-value pairs allowed in the tree/the minimum degree of B+Tree
      **/
@@ -34,11 +35,11 @@ public class BTree {
      * @return recordID for the given StudentID. Otherwise, -1
      */
     public long search(long studentId) {
-        if (root == null) {
+        if (this.root == null) {
             System.out.println("The studentId " + studentId + " has not been found in the table.");
             return -1;
         }
-        return root.search(studentId);
+        return this.root.search(studentId);
     }
 
 
@@ -49,26 +50,28 @@ public class BTree {
      * @return B+Tree after inserting the student
      */
     public BTree insert(Student student) {
-        if (root == null) {
-            root = new BTreeNode(t, true);
-            root.keys[0] = student.getStudentId();
-            root.values[0] = student.getRecordId();
-            root.n = 1;
-        } else {
-            if (root.n == 2 * t - 1) {
-                BTreeNode s = new BTreeNode(t, false);
-                s.children[0] = root;
-                s.splitChild(0, root);
-                int i = 0;
-                if (s.keys[0] < student.getStudentId()) {
-                    i++;
-                }
-                s.children[i].insertNonFull(student);
-                root = s;
-            } else {
-                root.insertNonFull(student);
+        if (this.root == null) { // Tree is empty
+            this.root = new BTreeNode(t, true);
+            this.root.keys[0] = student.getStudentId();
+            this.root.values[0] = student.getRecordId();
+            this.root.n = 1;
+            return this;
+        } 
+        // Tree is not empty
+        if (this.root.n == 2 * t) { // root is full, then tree grows in height
+            BTreeNode s = new BTreeNode(t, false);
+            s.children[0] = this.root;
+            s.splitChild(0, this.root);
+            int i = 0;
+            if (s.keys[0] < student.getStudentId()) {
+                i++;
             }
-        }
+            s.children[i].insertNonFull(student);
+            this.root = s;
+            return this;
+        } 
+        // tree is not empty and root is not full
+        this.root.insertNonFull(student);
         return this;
     }
 
@@ -79,16 +82,16 @@ public class BTree {
      * @return true if the student is deleted successfully otherwise, return false.
      */
     public boolean delete(long studentId) {
-        if (root == null) {
+        if (this.root == null) {
             System.out.println("The tree is empty");
             return false;
         }
-        root.delete(studentId);
-        if (root.n == 0) {
-            if (!root.leaf) {
-                root = root.children[0];
+        this.root.delete(studentId);
+        if (this.root.n == 0) {
+            if (!this.root.isLeaf) {
+                this.root = this.root.children[0];
             } else {
-                root = null;
+                this.root = null;
             }
         }
         return true;
@@ -101,8 +104,8 @@ public class BTree {
      */
     public List<Long> print() {
         List<Long> listOfRecordID = new ArrayList<>();
-        if (root != null) {
-            root.traverse(listOfRecordID);
+        if (this.root != null) {
+            this.root.traverse(listOfRecordID);
         }
         return listOfRecordID;
     }

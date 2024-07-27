@@ -44,10 +44,11 @@ public class BTreeMain {
                             String major = s2.next();
                             String level = s2.next();
                             int age = Integer.parseInt(s2.next());
-                            long recordID = Long.parseLong(s2.next());
-                            // long recordID = generateRecordID(); // 生成recordID
+                            long recordID = s2.hasNext() ? Long.parseLong(s2.next()) : generateRecordID();
                             Student s = new Student(studentId, age, studentName, major, level, recordID);
-                            bTree.insert(s);
+                            if(bTree.insert(s) != null) {
+                                writeBackToDB(s);
+                            }
                             break;
                         case "delete":
                             studentId = Long.parseLong(s2.next());
@@ -137,5 +138,22 @@ public class BTreeMain {
         } while (existingRecordIDs.contains(recordID) || recordID <= 0);
 
         return recordID;
+    }
+
+    /**
+     * Write back the student to the database.
+     * @param student student to write back
+     */
+    private static void writeBackToDB(Student student) {
+        // Write back to the database
+        File file = new File("src/Student.csv");
+        try {
+            java.io.FileWriter fileWriter = new java.io.FileWriter(file, true);
+            fileWriter.write(student.getStudentId() + "," + student.getStudentName() + "," + student.getMajor() + ","
+                    + student.getLevel() + "," + student.getAge() + "," + student.getRecordId() + "\n");
+            fileWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

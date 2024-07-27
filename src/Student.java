@@ -70,4 +70,8 @@ public class Student {
     public void setMajor(String major) {
         this.major = major;
     }
+
+    public String getLevel() {
+        return level;
+    }
 }
