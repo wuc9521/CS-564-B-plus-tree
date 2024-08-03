@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * B+Tree Structure
@@ -10,27 +8,18 @@ import java.util.HashSet;
  */
 public class BTree {
 
-    /**
-     * Pointer to the root node.
-     */
-    private BTreeNode root;
+    private BTreeNode root; // Pointer to the root node.
 
-    /**
-     * Number of key-value pairs allowed in the tree/the minimum degree of B+Tree
-     **/
-    private int t;
+    private int t; // Number of key-value pairs allowed in the tree/the minimum degree of B+Tree
 
     /**
      * Constructor
-     * 
      * @param t minimum degree of B+Tree
      */
     public BTree(int t) {
         this.root = null;
         this.t = t;
     }
-
-    private Set<Long> recordIds = new HashSet<>();
 
     /**
      * Search the studentId in the B+Tree
@@ -70,13 +59,13 @@ public class BTree {
             if (s.keys[0] < student.getStudentId()) {
                 i++;
             }
-            s.children[i].insertNonFull(student);
-            this.root = s;
-            return this;
+            if(s.children[i].insertNonFull(student)){
+                this.root = s;
+                return this;
+            }
         } 
         // tree is not empty and root is not full
-        this.root.insertNonFull(student);
-        return this;
+        return this.root.insertNonFull(student) ? this : null;
     }
 
     /**

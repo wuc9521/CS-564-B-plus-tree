@@ -79,10 +79,7 @@ public class BTreeMain {
                             }
                             break;
                         case "print":
-                            List<Long> listOfRecordID = bTree.print();
-                            System.out.println(
-                                    "List of recordIDs in B+Tree " +
-                                            listOfRecordID.toString());
+                            System.out.println("List of recordIDs in B+Tree " + bTree.print().toString());
                             break;
                         default:
                             System.out.println("Wrong Operation");

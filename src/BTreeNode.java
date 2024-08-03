@@ -80,7 +80,7 @@ public class BTreeNode {
      * 
      * @param student student to search
      */
-    public void insertNonFull(Student student) {
+    public boolean insertNonFull(Student student) {
         int idx = this.n - 1;
         if (isLeaf) {
             // Find the location where new key should be inserted
@@ -92,12 +92,13 @@ public class BTreeNode {
             // Check if the key already exists
             if (idx >= 0 && this.keys[idx] == student.getStudentId()) {
                 System.out.println("The studentId " + student.getStudentId() + " already exists in the tree.");
-                return;
+                return false;
             } else {
                 // Insert the new key at found location
                 this.keys[idx + 1] = student.getStudentId();
                 this.values[idx + 1] = student.getRecordId();
                 n++;
+                return true;
             }
         } else {
             while (idx >= 0 && this.keys[idx] > student.getStudentId()) {
@@ -109,7 +110,7 @@ public class BTreeNode {
                     idx++;
                 }
             }
-            this.children[idx + 1].insertNonFull(student);
+            return this.children[idx + 1].insertNonFull(student);
         }
     }
 
